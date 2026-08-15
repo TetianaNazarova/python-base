@@ -18,7 +18,7 @@ def user_not_found_exception_handler(request: Request, exc: UserNotFoundExceptio
         }
     )
 
-@app.get("/user/{name")
+@app.get("/user/{name}")
 def get_user(name: str):
     if name != "Tanya":
         raise UserNotFoundException(name)
