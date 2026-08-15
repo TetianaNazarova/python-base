@@ -1,49 +1,41 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from starlette import status
 
 app = FastAPI()
 
-todos = []
+class UserNotFoundException(Exception):
+    def __init__(self, name: str):
+        self.name = name
 
-class Todo(BaseModel):
-    id: int
-    title: str
-    completed: bool
+@app.exception_handler(UserNotFoundException)
+def user_not_found_exception_handler(request: Request, exc: UserNotFoundException):
+    return JSONResponse(
+        status_code = 404,
+        content = {
+            "status": "error",
+            "message": f"User {exc.name} Not Found",
+        }
+    )
 
-@app.post("/todos")
-def create_todo(todo: Todo):
-    todos.append(todo)
+@app.get("/user/{name")
+def get_user(name: str):
+    if name != "Tanya":
+        raise UserNotFoundException(name)
     return {
-        "message": "TODO added",
-        "data": todo
+        "name": name
     }
 
-@app.get("/todos")
-def get_todos():
-    return todos
-
-@app.get("/todos/{id}")
-def get_todo(id: int):
-    for todo in todos:
-        if todo.id == id:
-            return todo
-    return {"error": "Todo not found"}
-
-@app.put("/todos/{id}")
-def update_todo(id: int, updated_todo: Todo):
-    for index, todo in enumerate(todos):
-        if todo.id == id:
-            todos[index] = updated_todo
-            return {
-                "message": "Data updated successfully",
-                "data": updated_todo
-            }
-    return {"error": "Todo not found"}
-
-@app.delete("/todos/{id}")
-def delete_todo(id: int):
-    for index, todo in enumerate(todos):
-        if todo.id == id:
-            todos.pop(index)
-            return {"message": "Data deleted successfully"}
-    return {"error": "Todo not found"}
+# @app.get("/users/{user_id}")
+# def get_user(user_id: int):
+#     if user_id != 1:
+#         raise HTTPException(
+#             status_code = 404,
+#             detail = "User Not Found",
+#         )
+#     return {
+#         "message": "User found",
+#         "name": "Tanya",
+#         "id": user_id
+#     }
+#
